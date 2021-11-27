@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="dbd690a3-ae7f-4df3-9f07-6e228e0ff501" >
+		<http:listener-connection host="localhost" port="8083" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="1d774eff-a55d-4218-a273-49535bf3ce82" />
+	<file:config name="File_Config1" doc:name="File Config" doc:id="1b63a76b-279b-4432-a10e-ee11ce839004" />
+	<flow name="fileconnectorFlow" doc:id="3a18f1e2-13db-4079-8df8-cda89aff51c5" >
+		<http:listener doc:name="READ FILE" doc:id="ebfb0908-014d-4861-b3dc-2029b817b84e" config-ref="HTTP_Listener_config" path="file" allowedMethods="get"/>
+		<logger level="INFO" doc:name="Logger" doc:id="9a5a08ae-7120-414a-baff-604029d4f253" message="Connected with file"/>
+		<file:read doc:name="Read" doc:id="ca9cf23d-23d0-419b-9865-48613734258b" config-ref="File_Config" path="C:\Users\puttinagendra\Desktop\mule\New folder\sample1.json"/>
+		<ee:transform doc:name="Transform Message" doc:id="e434b7ee-c504-4de1-b380-0fc6ea3881a8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="d764ac73-e483-4a20-aa93-e4f14e15a197" message="#[payload]"/>
+		<file:write doc:name="Write" doc:id="66230571-b988-40f4-b951-aca22eeda18d" config-ref="File_Config" path="C:\Users\puttinagendra\Desktop\mule\New folder\output.txt">
+			<file:content ><![CDATA[<<<<hi well come to write oprations>>>>>>]]></file:content>
+		</file:write>
+	</flow>
+	<flow name="fileconnectorFlow1" doc:id="86af6e30-b7d3-4efd-9751-7e138cb723e0" >
+		<file:listener doc:name="On New or Updated File" doc:id="c700eb73-68b2-4660-9399-3fef23a8a72e" config-ref="File_Config" directory="C:\Users\puttinagendra\Desktop\mule\New folder\input" autoDelete="true" moveToDirectory="C:\Users\puttinagendra\Desktop\mule\New folder\output" renameTo="hello.txt">
+			<scheduling-strategy >
+				<fixed-frequency frequency="1" timeUnit="MINUTES" />
+			</scheduling-strategy>
+		</file:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="9ce6b9cc-db7c-4927-b889-23cfb5fd810e" message="#[payload]"/>
+	</flow>
+</mule>
